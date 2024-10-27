@@ -2,13 +2,23 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * Login component allows users to log in to the application using their email and password.
+ *
+ * @returns {JSX.Element} The rendered Login component.
+ */
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  /**
+   * Handles the form submission for user login.
+   *
+   * @param {Event} event - The form submission event.
+   */
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     try {
       const response = await axios.post('/users/login', {
         email,
@@ -34,7 +44,7 @@ function Login() {
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(event) => setEmail(event.target.value)}
             required
           />
         </div>
@@ -43,7 +53,7 @@ function Login() {
           <input
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(event) => setPassword(event.target.value)}
             required
           />
         </div>
