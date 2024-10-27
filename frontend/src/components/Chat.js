@@ -1,16 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+/**
+ * Chat component allows users to chat with the project manager of a selected team.
+ *
+ * @returns {JSX.Element} The rendered Chat component.
+ */
 function Chat() {
   const [teams, setTeams] = useState([]);
   const [selectedTeamId, setSelectedTeamId] = useState('');
   const [messages, setMessages] = useState([]);
   const [messageContent, setMessageContent] = useState('');
 
+  // Fetch teams on component mount
   useEffect(() => {
     fetchTeams();
   }, []);
 
+  /**
+   * Fetches the list of teams associated with the user.
+   */
   const fetchTeams = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -23,6 +32,11 @@ function Chat() {
     }
   };
 
+  /**
+   * Fetches chat messages for a selected team.
+   *
+   * @param {string} teamId - The ID of the selected team.
+   */
   const fetchMessages = async (teamId) => {
     try {
       const token = localStorage.getItem('token');
@@ -35,11 +49,19 @@ function Chat() {
     }
   };
 
+  /**
+   * Handles team selection and fetches messages for the selected team.
+   *
+   * @param {string} teamId - The ID of the selected team.
+   */
   const handleSelectTeam = (teamId) => {
     setSelectedTeamId(teamId);
     fetchMessages(teamId);
   };
 
+  /**
+   * Handles sending a message to the project manager.
+   */
   const handleSendMessage = async () => {
     if (!messageContent) return;
     try {
@@ -64,7 +86,7 @@ function Chat() {
         <label>Select Team:</label>
         <select
           value={selectedTeamId}
-          onChange={(e) => handleSelectTeam(e.target.value)}
+          onChange={(event) => handleSelectTeam(event.target.value)}
         >
           <option value="">Select a team</option>
           {teams.map((team) => (
@@ -76,7 +98,15 @@ function Chat() {
       </div>
       {selectedTeamId && (
         <div>
-          <div style={{ border: '1px solid #ccc', padding: '10px', height: '300px', overflowY: 'scroll', margin: '10px 0' }}>
+          <div
+            style={{
+              border: '1px solid #ccc',
+              padding: '10px',
+              height: '300px',
+              overflowY: 'scroll',
+              margin: '10px 0',
+            }}
+          >
             {messages.map((msg) => (
               <div key={msg.id}>
                 <strong>{msg.sender_type}</strong>: {msg.message}
@@ -87,7 +117,7 @@ function Chat() {
             <input
               type="text"
               value={messageContent}
-              onChange={(e) => setMessageContent(e.target.value)}
+              onChange={(event) => setMessageContent(event.target.value)}
               placeholder="Type your message"
             />
             <button onClick={handleSendMessage}>Send</button>
