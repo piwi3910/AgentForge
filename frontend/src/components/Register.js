@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 /**
  * Register component allows new users to create an account by providing an email and password.
@@ -20,15 +21,16 @@ function Register() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      await axios.post('/users/register', {
+      await axios.post('/auth/register', {
         email,
         password,
       });
+      toast.success('Registration successful! Please log in.');
       // Redirect to login page after successful registration
       navigate('/login');
     } catch (error) {
       console.error('Registration error:', error);
-      alert('Registration failed: ' + error.response.data.message);
+      toast.error('Registration failed: ' + error.response.data.message);
     }
   };
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 /**
  * Login component allows users to log in to the application using their email and password.
@@ -20,18 +21,18 @@ function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post('/users/login', {
+      const response = await axios.post('/auth/login', {
         email,
         password,
       });
       // Save the JWT token to local storage
       localStorage.setItem('token', response.data.access_token);
+      toast.success('Login successful!');
       // Redirect to home page
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);
-      // Handle login error (e.g., display error message)
-      alert('Invalid credentials');
+      toast.error('Invalid credentials');
     }
   };
 

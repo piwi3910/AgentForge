@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 
 /**
  * Profile component allows users to view and update their profile information.
@@ -45,12 +46,12 @@ function Profile() {
         { old_password: oldPassword, new_password: newPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert('Password updated successfully.');
+      toast.success('Password updated successfully.');
       setOldPassword('');
       setNewPassword('');
     } catch (error) {
       console.error('Error updating password:', error);
-      alert('Failed to update password: ' + error.response.data.message);
+      toast.error('Failed to update password: ' + error.response.data.message);
     }
   };
 
