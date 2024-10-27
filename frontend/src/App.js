@@ -7,6 +7,7 @@ import Home from './components/Home';
 import Models from './components/Models';
 import Teams from './components/Teams';
 import Chat from './components/Chat';
+import PrivateRoute from './components/PrivateRoute';
 
 /**
  * Main application component that defines routing and includes the Navbar.
@@ -21,11 +22,32 @@ function App() {
         {/* Define your routes here */}
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route
+            path="/models"
+            element={
+              <PrivateRoute>
+                <Models />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/teams"
+            element={
+              <PrivateRoute>
+                <Teams />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/chat"
+            element={
+              <PrivateRoute>
+                <Chat />
+              </PrivateRoute>
+            }
+          />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/models" element={<Models />} />
-          <Route path="/teams" element={<Teams />} />
-          <Route path="/chat" element={<Chat />} />
           {/* Add other routes as needed */}
         </Routes>
       </div>
