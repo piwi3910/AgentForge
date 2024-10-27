@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
 import Login from './components/Login';
 import Register from './components/Register';
 import Home from './components/Home';
@@ -8,7 +9,7 @@ import Teams from './components/Teams';
 import Chat from './components/Chat';
 
 /**
- * Main application component that defines routing for the AgentForge application.
+ * Main application component that defines routing and includes the Navbar.
  *
  * @returns {JSX.Element} The rendered application.
  */
@@ -16,6 +17,7 @@ function App() {
   return (
     <Router>
       <div className="App">
+        <Navbar />
         {/* Define your routes here */}
         <Routes>
           <Route path="/" element={<Home />} />
