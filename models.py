@@ -10,6 +10,7 @@ class User(db.Model):
     password_hash = db.Column(db.String(128), nullable=False)
     api_keys = db.relationship('APIKey', backref='user', lazy=True)
     enabled_models = db.relationship('EnabledModel', backref='user', lazy=True)
+    teams = db.relationship('Team', backref='user', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -31,3 +32,21 @@ class EnabledModel(db.Model):
     provider = db.Column(db.String(50), nullable=False)
     model_name = db.Column(db.String(100), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+
+class Team(db.Model):
+    __tablename__ = 'teams'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    function = db.Column(db.String(255), nullable=True)
+    project_manager_id = db.Column(db.Integer, db.ForeignKey('agents.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    agents = db.relationship('Agent', backref='team', lazy=True)
+
+class Agent(db.Model):
+    __tablename__ = 'agents'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    role = db.Column(db.String(100), nullable=True)
+    enabled_model_id = db.Column(db.Integer, db.ForeignKey('enabled_models.id'), nullable=False)
+    team_id = db.Column(db.Integer, db.ForeignKey('teams.id'), nullable=False)
+    is_project_manager = db.Column(db.Boolean, default=False)
