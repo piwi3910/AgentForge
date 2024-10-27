@@ -6,11 +6,14 @@ from flask_jwt_extended import (
 )
 from models import db, User, APIKey, EnabledModel, Team, Agent, ChatMessage
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///agentforge.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'your-secret-key'  # Replace with a strong secret key
+
+# Load JWT secret key from environment variable
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'default-secret-key')
 
 db.init_app(app)
 jwt = JWTManager(app)
@@ -154,12 +157,10 @@ class PasswordReset(Resource):
         else:
             return {'message': 'Invalid email'}, 400
 
-# Function to test API key validity (stub implementations)
+# Function to test API key validity
 def test_api_key(provider, api_key_value, endpoint=None):
-    # Implement logic to test the API key with the provider
-    # Return True if valid, False otherwise
-    # Example for OpenAI:
-    if provider.lower() == 'openai':
+    provider = provider.lower()
+    if provider == 'openai':
         import openai
         openai.api_key = api_key_value
         if endpoint:
@@ -169,15 +170,25 @@ def test_api_key(provider, api_key_value, endpoint=None):
             return True
         except Exception:
             return False
-    # Similar logic for other providers...
-    return False
+    elif provider == 'anthropic':
+        # Implement Anthropic API key testing
+        # Placeholder implementation
+        return False
+    elif provider == 'openrouter':
+        # Implement OpenRouter API key testing
+        # Placeholder implementation
+        return False
+    elif provider == 'ollama':
+        # Implement Ollama API key testing
+        # Placeholder implementation
+        return False
+    else:
+        return False
 
-# Function to retrieve available models (stub implementations)
+# Function to retrieve available models
 def get_available_models(provider, api_key_value, endpoint=None):
-    # Implement logic to get available models from the provider
-    # Return a list of model names
-    # Example for OpenAI:
-    if provider.lower() == 'openai':
+    provider = provider.lower()
+    if provider == 'openai':
         import openai
         openai.api_key = api_key_value
         if endpoint:
@@ -188,8 +199,20 @@ def get_available_models(provider, api_key_value, endpoint=None):
             return model_names
         except Exception:
             return None
-    # Similar logic for other providers...
-    return None
+    elif provider == 'anthropic':
+        # Implement Anthropic model retrieval
+        # Placeholder implementation
+        return []
+    elif provider == 'openrouter':
+        # Implement OpenRouter model retrieval
+        # Placeholder implementation
+        return []
+    elif provider == 'ollama':
+        # Implement Ollama model retrieval
+        # Placeholder implementation
+        return []
+    else:
+        return None
 
 # Models management endpoints
 @models_ns.route('/api-keys')
