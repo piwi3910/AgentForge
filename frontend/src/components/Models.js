@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+/**
+ * Models component allows users to manage API keys and models for different providers.
+ *
+ * @returns {JSX.Element} The rendered Models component.
+ */
 function Models() {
   const [apiKeys, setApiKeys] = useState([]);
   const [providers] = useState(['OpenAI', 'Anthropic', 'OpenRouter', 'Ollama']);
@@ -16,6 +21,9 @@ function Models() {
     fetchEnabledModels();
   }, []);
 
+  /**
+   * Fetches the API keys associated with the user.
+   */
   const fetchApiKeys = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -28,6 +36,9 @@ function Models() {
     }
   };
 
+  /**
+   * Fetches the models enabled by the user.
+   */
   const fetchEnabledModels = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -40,6 +51,9 @@ function Models() {
     }
   };
 
+  /**
+   * Handles adding a new API key for a selected provider.
+   */
   const handleAddApiKey = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -62,6 +76,9 @@ function Models() {
     }
   };
 
+  /**
+   * Handles retrieving available models from the selected provider.
+   */
   const handleGetModels = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -75,6 +92,11 @@ function Models() {
     }
   };
 
+  /**
+   * Handles enabling a selected model.
+   *
+   * @param {string} modelName - The name of the model to enable.
+   */
   const handleEnableModel = async (modelName) => {
     try {
       const token = localStorage.getItem('token');
@@ -94,6 +116,11 @@ function Models() {
     }
   };
 
+  /**
+   * Handles disabling a selected model.
+   *
+   * @param {string} modelName - The name of the model to disable.
+   */
   const handleDisableModel = async (modelName) => {
     try {
       const token = localStorage.getItem('token');
@@ -120,11 +147,11 @@ function Models() {
         <label>Provider:</label>
         <select
           value={selectedProvider}
-          onChange={(e) => setSelectedProvider(e.target.value)}
+          onChange={(event) => setSelectedProvider(event.target.value)}
         >
-          {providers.map((provider) => (
-            <option key={provider} value={provider}>
-              {provider}
+          {providers.map((providerItem) => (
+            <option key={providerItem} value={providerItem}>
+              {providerItem}
             </option>
           ))}
         </select>
@@ -133,7 +160,7 @@ function Models() {
           <input
             type="text"
             value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
+            onChange={(event) => setApiKey(event.target.value)}
             required
           />
         </div>
@@ -142,7 +169,7 @@ function Models() {
           <input
             type="text"
             value={endpoint}
-            onChange={(e) => setEndpoint(e.target.value)}
+            onChange={(event) => setEndpoint(event.target.value)}
           />
         </div>
         <button onClick={handleAddApiKey}>Add API Key</button>
