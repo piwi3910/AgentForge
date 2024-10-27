@@ -38,6 +38,7 @@ function Navbar() {
           <Link to="/models" style={linkStyle}>Models</Link>
           <Link to="/teams" style={linkStyle}>Teams</Link>
           <Link to="/chat" style={linkStyle}>Chat</Link>
+          <Link to="/profile" style={linkStyle}>Profile</Link>
           <button onClick={handleLogout} style={linkStyle}>Logout</button>
         </>
       ) : (

@@ -7,6 +7,7 @@ import Home from './components/Home';
 import Models from './components/Models';
 import Teams from './components/Teams';
 import Chat from './components/Chat';
+import Profile from './components/Profile';
 import PrivateRoute from './components/PrivateRoute';
 
 /**
@@ -43,6 +44,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Chat />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
               </PrivateRoute>
             }
           />
