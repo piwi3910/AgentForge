@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+/**
+ * Teams component allows users to manage teams by creating new teams,
+ * adding agents, and selecting models for agents.
+ *
+ * @returns {JSX.Element} The rendered Teams component.
+ */
 function Teams() {
   const [teams, setTeams] = useState([]);
   const [teamName, setTeamName] = useState('');
@@ -18,6 +24,9 @@ function Teams() {
     fetchEnabledModels();
   }, []);
 
+  /**
+   * Fetches all teams associated with the user.
+   */
   const fetchTeams = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -30,6 +39,9 @@ function Teams() {
     }
   };
 
+  /**
+   * Fetches all enabled models for the user.
+   */
   const fetchEnabledModels = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -42,6 +54,9 @@ function Teams() {
     }
   };
 
+  /**
+   * Handles the creation of a new team with a project manager.
+   */
   const handleCreateTeam = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -65,11 +80,21 @@ function Teams() {
     }
   };
 
+  /**
+   * Selects a team and fetches its agents.
+   *
+   * @param {number} teamId - The ID of the selected team.
+   */
   const handleSelectTeam = (teamId) => {
     setSelectedTeamId(teamId);
     fetchAgents(teamId);
   };
 
+  /**
+   * Fetches all agents for a specific team.
+   *
+   * @param {number} teamId - The ID of the team.
+   */
   const fetchAgents = async (teamId) => {
     try {
       const token = localStorage.getItem('token');
@@ -82,6 +107,9 @@ function Teams() {
     }
   };
 
+  /**
+   * Handles adding a new agent to the selected team.
+   */
   const handleAddAgent = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -91,7 +119,6 @@ function Teams() {
           name: agentName,
           role: agentRole,
           model_id: agentModelId,
-          team_id: selectedTeamId,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -116,7 +143,7 @@ function Teams() {
           <input
             type="text"
             value={teamName}
-            onChange={(e) => setTeamName(e.target.value)}
+            onChange={(event) => setTeamName(event.target.value)}
             required
           />
         </div>
@@ -125,14 +152,14 @@ function Teams() {
           <input
             type="text"
             value={teamFunction}
-            onChange={(e) => setTeamFunction(e.target.value)}
+            onChange={(event) => setTeamFunction(event.target.value)}
           />
         </div>
         <div>
           <label>Select Project Manager Model:</label>
           <select
             value={projectManagerModelId}
-            onChange={(e) => setProjectManagerModelId(e.target.value)}
+            onChange={(event) => setProjectManagerModelId(event.target.value)}
           >
             <option value="">Select a model</option>
             {enabledModels.map((model) => (
@@ -167,7 +194,7 @@ function Teams() {
               <input
                 type="text"
                 value={agentName}
-                onChange={(e) => setAgentName(e.target.value)}
+                onChange={(event) => setAgentName(event.target.value)}
                 required
               />
             </div>
@@ -176,14 +203,14 @@ function Teams() {
               <input
                 type="text"
                 value={agentRole}
-                onChange={(e) => setAgentRole(e.target.value)}
+                onChange={(event) => setAgentRole(event.target.value)}
               />
             </div>
             <div>
               <label>Select Agent Model:</label>
               <select
                 value={agentModelId}
-                onChange={(e) => setAgentModelId(e.target.value)}
+                onChange={(event) => setAgentModelId(event.target.value)}
               >
                 <option value="">Select a model</option>
                 {enabledModels.map((model) => (
