@@ -1,5 +1,10 @@
 import React from 'react';
 
+/**
+ * Home component serves as the main dashboard for authenticated users.
+ *
+ * @returns {JSX.Element} The rendered Home component.
+ */
 function Home() {
   return (
     <div>
