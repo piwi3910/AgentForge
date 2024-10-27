@@ -7,6 +7,11 @@ import Models from './components/Models';
 import Teams from './components/Teams';
 import Chat from './components/Chat';
 
+/**
+ * Main application component that defines routing for the AgentForge application.
+ *
+ * @returns {JSX.Element} The rendered application.
+ */
 function App() {
   return (
     <Router>
