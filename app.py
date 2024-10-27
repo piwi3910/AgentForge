@@ -1,8 +1,11 @@
 from flask import Flask, request
 from flask_restx import Api, Resource, fields
 from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from models import db, User, APIKey, EnabledModel, Team, Agent
+from flask_jwt_extended import (
+    JWTManager, create_access_token, jwt_required, get_jwt_identity
+)
+from models import db, User, APIKey, EnabledModel, Team, Agent, ChatMessage
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///agentforge.db'
@@ -18,6 +21,7 @@ api = Api(app, title='AgentForge API', description='APIs for AgentForge applicat
 user_ns = api.namespace('users', description='User operations')
 models_ns = api.namespace('models', description='Model management')
 teams_ns = api.namespace('teams', description='Team management')
+chat_ns = api.namespace('chat', description='Chat operations')
 
 # User models for Swagger documentation
 user_model = user_ns.model('User', {
@@ -64,6 +68,11 @@ agent_model = teams_ns.model('Agent', {
     'role': fields.String(description='Agent role'),
     'model_id': fields.Integer(required=True, description='EnabledModel ID for agent'),
     'team_id': fields.Integer(required=True, description='Team ID'),
+})
+
+# Chat models for Swagger documentation
+chat_message_model = chat_ns.model('ChatMessage', {
+    'message': fields.String(required=True, description='Chat message'),
 })
 
 # User registration endpoint
@@ -411,6 +420,83 @@ class AgentList(Resource):
         db.session.add(agent)
         db.session.commit()
         return {'message': 'Agent added successfully', 'agent_id': agent.id}, 201
+
+# Chat endpoints
+@chat_ns.route('/<int:team_id>/messages')
+class ChatMessages(Resource):
+    @jwt_required()
+    def get(self, team_id):
+        """Get chat history for a team"""
+        current_user_email = get_jwt_identity()
+        user = User.query.filter_by(email=current_user_email).first()
+        team = Team.query.filter_by(id=team_id, user_id=user.id).first()
+        if not team:
+            return {'message': 'Team not found'}, 404
+        messages = ChatMessage.query.filter_by(team_id=team.id).order_by(ChatMessage.timestamp).all()
+        result = []
+        for msg in messages:
+            result.append({
+                'id': msg.id,
+                'sender_type': msg.sender_type,
+                'sender_id': msg.sender_id,
+                'message': msg.message,
+                'timestamp': msg.timestamp.isoformat()
+            })
+        return {'messages': result}, 200
+
+    @jwt_required()
+    @chat_ns.expect(chat_message_model)
+    def post(self, team_id):
+        """Send a message to the project manager"""
+        current_user_email = get_jwt_identity()
+        user = User.query.filter_by(email=current_user_email).first()
+        data = api.payload
+        message_content = data.get('message')
+        team = Team.query.filter_by(id=team_id, user_id=user.id).first()
+        if not team:
+            return {'message': 'Team not found'}, 404
+        # Save user message
+        user_message = ChatMessage(
+            sender_type='user',
+            sender_id=user.id,
+            message=message_content,
+            user_id=user.id,
+            team_id=team.id
+        )
+        db.session.add(user_message)
+        db.session.commit()
+        # Process message with project manager
+        response = process_project_manager_message(user, team, message_content)
+        # Save project manager response
+        pm_agent = Agent.query.filter_by(id=team.project_manager_id).first()
+        pm_message = ChatMessage(
+            sender_type='project_manager',
+            sender_id=pm_agent.id,
+            message=response,
+            user_id=user.id,
+            team_id=team.id,
+            agent_id=pm_agent.id
+        )
+        db.session.add(pm_message)
+        db.session.commit()
+        return {'message': 'Message sent to project manager', 'response': response}, 200
+
+def process_project_manager_message(user, team, user_message):
+    """Simulate project manager processing and delegation to agents"""
+    # For now, simulate by delegating to agents and collecting responses
+    agents = Agent.query.filter_by(team_id=team.id).all()
+    responses = []
+    for agent in agents:
+        if not agent.is_project_manager:
+            agent_response = simulate_agent_response(agent, user_message)
+            responses.append(f"{agent.name}: {agent_response}")
+    # Compile project manager response
+    pm_response = "I have delegated your request to the team:\n" + "\n".join(responses)
+    return pm_response
+
+def simulate_agent_response(agent, user_message):
+    """Simulate an agent's response based on their role"""
+    return f"Processed '{user_message}' as part of my role '{agent.role}'."
 
 if __name__ == '__main__':
     with app.app_context():
