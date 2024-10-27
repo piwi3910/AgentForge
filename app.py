@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_restx import Api, Resource, fields
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from models import db, User, APIKey, EnabledModel
+from models import db, User, APIKey, EnabledModel, Team, Agent
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///agentforge.db'
@@ -17,6 +17,7 @@ api = Api(app, title='AgentForge API', description='APIs for AgentForge applicat
 # Namespaces
 user_ns = api.namespace('users', description='User operations')
 models_ns = api.namespace('models', description='Model management')
+teams_ns = api.namespace('teams', description='Team management')
 
 # User models for Swagger documentation
 user_model = user_ns.model('User', {
@@ -49,6 +50,20 @@ api_key_model = models_ns.model('APIKey', {
 enabled_model_model = models_ns.model('EnabledModel', {
     'provider': fields.String(required=True, description='Provider name'),
     'model_name': fields.String(required=True, description='Model name'),
+})
+
+# Team models for Swagger documentation
+team_model = teams_ns.model('Team', {
+    'name': fields.String(required=True, description='Team name'),
+    'function': fields.String(description='Team function'),
+    'project_manager_model_id': fields.Integer(required=True, description='EnabledModel ID for project manager'),
+})
+
+agent_model = teams_ns.model('Agent', {
+    'name': fields.String(required=True, description='Agent name'),
+    'role': fields.String(description='Agent role'),
+    'model_id': fields.Integer(required=True, description='EnabledModel ID for agent'),
+    'team_id': fields.Integer(required=True, description='Team ID'),
 })
 
 # User registration endpoint
@@ -109,7 +124,7 @@ class PasswordResetRequest(Resource):
         email = data.get('email')
         user = User.query.filter_by(email=email).first()
         if user:
-            # Here, implement sending a password reset email or token
+            # Implement sending a password reset email or token
             return {'message': 'Password reset instructions sent to your email'}, 200
         else:
             return {'message': 'Email not found'}, 404
@@ -241,7 +256,8 @@ class EnabledModels(Resource):
         for model in enabled_models:
             result.append({
                 'provider': model.provider,
-                'model_name': model.model_name
+                'model_name': model.model_name,
+                'id': model.id
             })
         return {'enabled_models': result}, 200
 
@@ -297,6 +313,104 @@ class EnabledModels(Resource):
             return {'message': f'Model {model_name} disabled for provider {provider}'}, 200
         else:
             return {'message': f'Model {model_name} not found in enabled models'}, 404
+
+# Team management endpoints
+@teams_ns.route('')
+class TeamList(Resource):
+    @jwt_required()
+    def get(self):
+        """Get all teams for the current user"""
+        current_user_email = get_jwt_identity()
+        user = User.query.filter_by(email=current_user_email).first()
+        teams = Team.query.filter_by(user_id=user.id).all()
+        result = []
+        for team in teams:
+            result.append({
+                'id': team.id,
+                'name': team.name,
+                'function': team.function
+            })
+        return {'teams': result}, 200
+
+    @jwt_required()
+    @teams_ns.expect(team_model)
+    def post(self):
+        """Create a new team with a project manager"""
+        data = api.payload
+        name = data.get('name')
+        function = data.get('function')
+        pm_model_id = data.get('project_manager_model_id')
+        current_user_email = get_jwt_identity()
+        user = User.query.filter_by(email=current_user_email).first()
+        # Check if enabled model exists
+        enabled_model = EnabledModel.query.filter_by(id=pm_model_id, user_id=user.id).first()
+        if not enabled_model:
+            return {'message': 'Enabled model not found'}, 404
+        # Create team
+        team = Team(name=name, function=function, user_id=user.id)
+        db.session.add(team)
+        db.session.commit()
+        # Create project manager agent
+        project_manager = Agent(
+            name='Project Manager',
+            role='Project Manager',
+            enabled_model_id=pm_model_id,
+            team_id=team.id,
+            is_project_manager=True
+        )
+        db.session.add(project_manager)
+        # Update team with project manager ID
+        team.project_manager_id = project_manager.id
+        db.session.commit()
+        return {'message': 'Team created successfully', 'team_id': team.id}, 201
+
+@teams_ns.route('/<int:team_id>/agents')
+class AgentList(Resource):
+    @jwt_required()
+    def get(self, team_id):
+        """Get all agents for a team"""
+        current_user_email = get_jwt_identity()
+        user = User.query.filter_by(email=current_user_email).first()
+        team = Team.query.filter_by(id=team_id, user_id=user.id).first()
+        if not team:
+            return {'message': 'Team not found'}, 404
+        agents = Agent.query.filter_by(team_id=team.id).all()
+        result = []
+        for agent in agents:
+            result.append({
+                'id': agent.id,
+                'name': agent.name,
+                'role': agent.role,
+                'enabled_model_id': agent.enabled_model_id,
+                'is_project_manager': agent.is_project_manager
+            })
+        return {'agents': result}, 200
+
+    @jwt_required()
+    @teams_ns.expect(agent_model)
+    def post(self, team_id):
+        """Add an agent to a team"""
+        data = api.payload
+        name = data.get('name')
+        role = data.get('role')
+        model_id = data.get('model_id')
+        current_user_email = get_jwt_identity()
+        user = User.query.filter_by(email=current_user_email).first()
+        team = Team.query.filter_by(id=team_id, user_id=user.id).first()
+        if not team:
+            return {'message': 'Team not found'}, 404
+        enabled_model = EnabledModel.query.filter_by(id=model_id, user_id=user.id).first()
+        if not enabled_model:
+            return {'message': 'Enabled model not found'}, 404
+        agent = Agent(
+            name=name,
+            role=role,
+            enabled_model_id=model_id,
+            team_id=team.id
+        )
+        db.session.add(agent)
+        db.session.commit()
+        return {'message': 'Agent added successfully', 'agent_id': agent.id}, 201
 
 if __name__ == '__main__':
     with app.app_context():
