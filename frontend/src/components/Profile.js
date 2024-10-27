@@ -2,6 +2,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
 
 /**
  * Profile component allows users to view and update their profile information.
@@ -56,33 +60,43 @@ function Profile() {
   };
 
   return (
-    <div>
-      <h2>User Profile</h2>
-      <div>
-        <label>Email:</label>
-        <input type="email" value={email} readOnly />
-      </div>
-      <div>
-        <h3>Change Password</h3>
-        <div>
-          <label>Old Password:</label>
-          <input
-            type="password"
-            value={oldPassword}
-            onChange={(event) => setOldPassword(event.target.value)}
-          />
-        </div>
-        <div>
-          <label>New Password:</label>
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(event) => setNewPassword(event.target.value)}
-          />
-        </div>
-        <button onClick={handleUpdatePassword}>Update Password</button>
-      </div>
-    </div>
+    <Container maxWidth="sm">
+      <Typography variant="h4" component="h1" gutterBottom>
+        User Profile
+      </Typography>
+      <TextField
+        label="Email"
+        type="email"
+        fullWidth
+        margin="normal"
+        value={email}
+        InputProps={{
+          readOnly: true,
+        }}
+      />
+      <Typography variant="h6" component="h2" gutterBottom>
+        Change Password
+      </Typography>
+      <TextField
+        label="Old Password"
+        type="password"
+        fullWidth
+        margin="normal"
+        value={oldPassword}
+        onChange={(event) => setOldPassword(event.target.value)}
+      />
+      <TextField
+        label="New Password"
+        type="password"
+        fullWidth
+        margin="normal"
+        value={newPassword}
+        onChange={(event) => setNewPassword(event.target.value)}
+      />
+      <Button variant="contained" color="primary" onClick={handleUpdatePassword} fullWidth>
+        Update Password
+      </Button>
+    </Container>
   );
 }
 

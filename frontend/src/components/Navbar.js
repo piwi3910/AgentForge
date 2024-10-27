@@ -1,6 +1,10 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 
 /**
  * Navbar component provides navigation links based on authentication status.
@@ -9,18 +13,6 @@ import { AuthContext } from '../context/AuthContext';
  */
 function Navbar() {
   const { isAuthenticated, setIsAuthenticated } = useContext(AuthContext);
-
-  const navStyle = {
-    padding: '10px',
-    borderBottom: '1px solid #ccc',
-    marginBottom: '20px',
-  };
-
-  const linkStyle = {
-    marginRight: '15px',
-    textDecoration: 'none',
-    color: '#333',
-  };
 
   /**
    * Handles user logout by clearing the token and updating authentication status.
@@ -31,23 +23,28 @@ function Navbar() {
   };
 
   return (
-    <nav style={navStyle}>
-      <Link to="/" style={linkStyle}>Home</Link>
-      {isAuthenticated ? (
-        <>
-          <Link to="/models" style={linkStyle}>Models</Link>
-          <Link to="/teams" style={linkStyle}>Teams</Link>
-          <Link to="/chat" style={linkStyle}>Chat</Link>
-          <Link to="/profile" style={linkStyle}>Profile</Link>
-          <button onClick={handleLogout} style={linkStyle}>Logout</button>
-        </>
-      ) : (
-        <>
-          <Link to="/login" style={linkStyle}>Login</Link>
-          <Link to="/register" style={linkStyle}>Register</Link>
-        </>
-      )}
-    </nav>
+    <AppBar position="static">
+      <Toolbar>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          AgentForge
+        </Typography>
+        <Button color="inherit" component={Link} to="/">Home</Button>
+        {isAuthenticated ? (
+          <>
+            <Button color="inherit" component={Link} to="/models">Models</Button>
+            <Button color="inherit" component={Link} to="/teams">Teams</Button>
+            <Button color="inherit" component={Link} to="/chat">Chat</Button>
+            <Button color="inherit" component={Link} to="/profile">Profile</Button>
+            <Button color="inherit" onClick={handleLogout}>Logout</Button>
+          </>
+        ) : (
+          <>
+            <Button color="inherit" component={Link} to="/login">Login</Button>
+            <Button color="inherit" component={Link} to="/register">Register</Button>
+          </>
+        )}
+      </Toolbar>
+    </AppBar>
   );
 }
 
